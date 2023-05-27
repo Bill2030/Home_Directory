@@ -16,6 +16,7 @@ def generate_password():
     password_symbols = [choice(symbols)  for _ in range(randint(2, 4))]
     password_numbers = [choice(numbers) for _ in range(randint(2, 4))]
 
+
     password_list = password_letters + password_symbols + password_numbers
     password = "".join(password_list)
     entry_password.insert(0, password)
@@ -33,18 +34,47 @@ def save():
         }
     }
 
-    if (website)== 0 or len(password)== 0:
+    if len(website)== 0 or len(password)== 0:
         messagebox.showinfo(title="oops", message="Dont leave any of the fields empty")
     else:
-        with open("data.json", "r") as data_file:
-            data = json.load(data_file)
-            data.update(new_data)
+        try:
+            with open("data.json", "r") as data_file:
+                data = json.load(data_file)
+        except FileNotFoundError:
+            with open("data.json", "w") as data_file:
+                json.dump(new_data, data_file, indent=4)
+
+        else:
+            #Updating old data with new data
+                data.update(new_data)
 
         with open("data.json", "w") as data_file:
             #saving the updated data
             json.dump(data, data_file, indent=4)
             entry_web.delete(0, END)
             entry_password.delete(0, END)
+
+def find_password():
+   website = entry_web.get()
+   try:
+        with open("data.json")as data_file:
+            data = json.load(data_file)
+   except FileNotFoundError:
+       messagebox.showinfo(title="error", message="No Data File Found")
+   else:
+       if website in data:
+           email = data[website]["email"]
+           password = data[website]["email"]
+           messagebox.showinfo(title=website, message=f"email:{email}\n password:{password}")
+       else:
+           messagebox.showinfo(title="error", message=f"No details for {website} found")
+
+
+
+
+
+
+
 
 
 
@@ -67,7 +97,8 @@ label_web.grid(column=0, row=1)
 entry_web = Entry(width=35)
 entry_web.grid(column=1, row=1, columnspan=3)
 entry_web.focus()
-
+button_search = Button(text="Search Button", command=find_password)
+button_search.grid(column=2, row=1, columnspan=3)
 label_email = Label(text="Email/Username")
 label_email.grid(column=0, row=2)
 
